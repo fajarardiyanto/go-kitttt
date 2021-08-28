@@ -24,10 +24,10 @@ func (s *service) CreateUser(ctx context.Context, u User) (*User, error) {
 
 	uid := uuid.New().String()
 	user := User{
-		ID: uid,
-		Name: u.Name,
+		ID:       uid,
+		Name:     u.Name,
 		Username: u.Username,
-		Email: u.Email,
+		Email:    u.Email,
 		Password: u.Password,
 	}
 

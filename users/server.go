@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func NewHTTPServer(ctx context.Context, endpoint Endpoint) http.Handler{
+func NewHTTPServer(ctx context.Context, endpoint Endpoint) http.Handler {
 	r := mux.NewRouter()
 	r.Use(commonMiddleware)
 
@@ -32,4 +32,3 @@ func commonMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
-

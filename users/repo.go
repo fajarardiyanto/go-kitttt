@@ -2,19 +2,19 @@ package users
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"github.com/go-kit/kit/log"
+	"github.com/jinzhu/gorm"
 )
 
 var RepoErr = errors.New("unable to Handle Repo Request")
 
 type repo struct {
-	db     *sql.DB
+	db     *gorm.DB
 	logger log.Logger
 }
 
-func NewRepo(db *sql.DB, logger log.Logger) Repository {
+func NewRepo(db *gorm.DB, logger log.Logger) Repository {
 	return &repo{
 		db: db,
 		logger: log.With(logger, "repo", "sql"),
@@ -26,7 +26,7 @@ func (r *repo) CreateUser(ctx context.Context, user *User) error {
 		return RepoErr
 	}
 
-	if _, err := r.db.ExecContext(ctx, createUserQuery, user.ID, user.Name, user.Email, user.Username, user.Password); err != nil {
+	if err := r.db.Debug().Model(&User{}).Create(&user).Error; err != nil {
 		return err
 	}
 
@@ -35,7 +35,9 @@ func (r *repo) CreateUser(ctx context.Context, user *User) error {
 
 func (r *repo) GetUser(ctx context.Context, id string) (*User, error) {
 	var user User
-	if err := r.db.QueryRow(getUserQuery, id).Scan(&user.ID, &user.Name, &user.Username, &user.Email, &user.Password); err != nil {
+
+	var err error
+	if err = r.db.Debug().Model(&User{}).Where("id = ?", id).Take(&user).Error; err != nil {
 		return nil, err
 	}
 

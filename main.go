@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"flag"
 	"fmt"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	"lat-gokit/users"
 	"net/http"
@@ -14,7 +14,14 @@ import (
 	"os/signal"
 	"syscall"
 )
-const DB_URI = "postgresql://frontend-hq:1qaz2wsx@localhost:5432/gokitexample?sslmode=disable"
+
+var (
+	DbHost = "localhost"
+	DbPort = "5432"
+	DbUser = "frontend-hq"
+	DbName = "gokitexample"
+	DbPassword = "1qaz2wsx"
+)
 
 func main() {
 	httpAddr := flag.String("http", ":8080", "http listen address")
@@ -32,13 +39,15 @@ func main() {
 	level.Info(logger).Log("msg", "service started")
 	defer level.Info(logger).Log("msg", "service ended")
 
-	var db *sql.DB
+	var db *gorm.DB
+	DB_URI := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", DbHost, DbPort, DbUser, DbName, DbPassword)
 	{
 		var err error
 
-		db, err = sql.Open("postgres", DB_URI)
+		db, err = gorm.Open("postgres", DB_URI)
 		if err != nil {
-			level.Error(logger).Log("Exit", err)
+			fmt.Println("qqqq", err.Error())
+			level.Error(logger).Log("Exit", err.Error())
 			os.Exit(-1)
 		}
 	}
