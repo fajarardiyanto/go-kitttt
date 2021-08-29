@@ -16,7 +16,7 @@ type repo struct {
 
 func NewRepo(db *gorm.DB, logger log.Logger) Repository {
 	return &repo{
-		db: db,
+		db:     db,
 		logger: log.With(logger, "repo", "sql"),
 	}
 }
@@ -33,6 +33,17 @@ func (r *repo) CreateUser(ctx context.Context, user *User) error {
 	return nil
 }
 
+func (r *repo) GetAllUsers(ctx context.Context) (*[]User, error) {
+	var user []User
+
+	var err error
+	if err = r.db.Debug().Model(&User{}).Find(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func (r *repo) GetUser(ctx context.Context, id string) (*User, error) {
 	var user User
 
@@ -42,4 +53,15 @@ func (r *repo) GetUser(ctx context.Context, id string) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+func (r *repo) DeleteUser(ctx context.Context, id string) error {
+	var user User
+
+	var err error
+	if err = r.db.Debug().Model(&User{}).Where("id = ?", id).Take(&user).Delete(&User{}).Error; err != nil {
+		return err
+	}
+
+	return err
 }

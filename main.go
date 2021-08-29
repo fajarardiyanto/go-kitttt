@@ -51,12 +51,13 @@ func main() {
 		}
 	}
 
+	users.LoadSeed(db)
+
 	flag.Parse()
 	ctx := context.Background()
 	var srv users.Service
 	{
 		repository := users.NewRepo(db, logger)
-		users.LoadSeed(db)
 
 		srv = users.NewService(repository, logger)
 	}

@@ -6,13 +6,15 @@ type User struct {
 	ID       string `gorm:"primary_key" json:"id"`
 	Name     string `gorm:"size:255;not null" json:"name"`
 	Email    string `gorm:"size:255" json:"email"`
-	Username string `gorm:"size:255;not null;unique" json:"username"`
+	Username string `gorm:"size:255;index:username;not null;unique" json:"username"`
 	Password string `gorm:"size:255;not null" json:"password"`
 }
 
-type Repository interface{
+type Repository interface {
 	CreateUser(ctx context.Context, user *User) error
+	GetAllUsers(ctx context.Context) (*[]User, error)
 	GetUser(ctx context.Context, id string) (*User, error)
+	DeleteUser(ctx context.Context, id string) error
 }
 
 //CREATE TABLE users (

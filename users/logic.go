@@ -41,6 +41,19 @@ func (s *service) CreateUser(ctx context.Context, u User) (*User, error) {
 	return &user, nil
 }
 
+func (s *service) GetAllUsers(ctx context.Context) (*[]User, error) {
+	logger := log.With(s.logger, "GET", "GetUser")
+
+	user, err := s.repostory.GetAllUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log("Get All User")
+
+	return user, err
+}
+
 func (s *service) GetUser(ctx context.Context, id string) (*User, error) {
 	logger := log.With(s.logger, "GET", "GetUser")
 
@@ -52,4 +65,15 @@ func (s *service) GetUser(ctx context.Context, id string) (*User, error) {
 	logger.Log("Get User", id)
 
 	return user, err
+}
+
+func (s *service) DeleteUser(ctx context.Context, id string) error {
+	logger := log.With(s.logger, "GET", "GetUser")
+
+	err := s.repostory.DeleteUser(ctx, id)
+
+
+	logger.Log("Delete User")
+
+	return err
 }
