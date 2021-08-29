@@ -4,23 +4,18 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
-	"github.com/jinzhu/gorm"
-	_ "github.com/lib/pq"
 	"lat-gokit/users"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-)
 
-var (
-	DbHost = "localhost"
-	DbPort = "5432"
-	DbUser = "frontend-hq"
-	DbName = "gokitexample"
-	DbPassword = "1qaz2wsx"
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
+	"github.com/jinzhu/gorm"
+	"github.com/joho/godotenv"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -30,23 +25,27 @@ func main() {
 		logger = log.NewLogfmtLogger(os.Stderr)
 		logger = log.NewSyncLogger(logger)
 		logger = log.With(logger,
-				"service", "users",
-				"time: ", log.DefaultTimestampUTC,
-				"caller", log.DefaultCaller,
-			)
+			"service", "users",
+			"time: ", log.DefaultTimestampUTC,
+			"caller", log.DefaultCaller,
+		)
 	}
 
 	level.Info(logger).Log("msg", "service started")
 	defer level.Info(logger).Log("msg", "service ended")
 
+	err := godotenv.Load()
+	if err != nil {
+		level.Error(logger).Log("Error getting env, not comming through ", err)
+	}
+
+	DB_URI := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", os.Getenv("DbHost"), os.Getenv("DbPort"), os.Getenv("DbUser"), os.Getenv("DbName"), os.Getenv("DbPassword"))
 	var db *gorm.DB
-	DB_URI := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", DbHost, DbPort, DbUser, DbName, DbPassword)
 	{
 		var err error
 
 		db, err = gorm.Open("postgres", DB_URI)
 		if err != nil {
-			fmt.Println("qqqq", err.Error())
 			level.Error(logger).Log("Exit", err.Error())
 			os.Exit(-1)
 		}
@@ -57,6 +56,7 @@ func main() {
 	var srv users.Service
 	{
 		repository := users.NewRepo(db, logger)
+		users.LoadSeed(db)
 
 		srv = users.NewService(repository, logger)
 	}
