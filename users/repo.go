@@ -33,6 +33,15 @@ func (r *repo) CreateUser(ctx context.Context, user *User) error {
 	return nil
 }
 
+func (r *repo) UpdateUser(ctx context.Context, user *User, id string) error {
+	var err error
+	if err = r.db.Debug().Model(&User{}).Where("id = ?", id).Take(&User{}).UpdateColumns(&user).Error; err != nil {
+		return err
+	}
+
+	return err
+}
+
 func (r *repo) GetAllUsers(ctx context.Context) (*[]User, error) {
 	var user []User
 

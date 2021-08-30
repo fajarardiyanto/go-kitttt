@@ -21,6 +21,25 @@ func decodeRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	return req, nil
 }
 
+func decodeUpdateRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	var req User
+	vars := mux.Vars(r)
+
+	req = User{
+		ID: vars["id"],
+		Username: req.Username,
+		Name: req.Name,
+		Email: req.Email,
+		Password: req.Password,
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 func decodeUserReq(ctx context.Context, r *http.Request) (interface{}, error) {
 	var req User
 	vars := mux.Vars(r)
@@ -46,4 +65,10 @@ func decodeDeleteUserReq(ctx context.Context, r *http.Request) (interface{}, err
 	}
 	fmt.Println(req)
 	return "Success Delete User", nil
+}
+
+type Response struct {
+	Error   bool        `json:"error"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }
